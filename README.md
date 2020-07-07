@@ -1,0 +1,2 @@
+# HttpClientUtils
+使用工厂模式获取HttpClient对象,提供三个方法，分别是sendPostByForm，sendPostByJson，sendPostByXml,SendHttpGet
