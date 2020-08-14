@@ -1,10 +1,18 @@
 package com.zyj.httpclient;
 
+import com.sun.xml.internal.ws.policy.PolicyMapUtil;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.message.BasicNameValuePair;
+
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author : zyj
@@ -57,13 +65,21 @@ public class HttpClientFactory {
         return httpPost;
     }
 
-    public HttpGet httpGet(String httpUrl)
+    public HttpGet httpGet(String httpUrl, Map<String,String> map)
     {
         HttpGet httpGet = null;
         URIBuilder uriBuilder = null;
         // 通过httpget方式来实现我们的get请求
         try {
             uriBuilder = new URIBuilder(httpUrl);
+            if(map!=null){
+                List<NameValuePair> list = new LinkedList<NameValuePair>();
+                for(Map.Entry<String, String> entry : map.entrySet()){
+                    BasicNameValuePair param = new BasicNameValuePair(entry.getKey(), entry.getValue());
+                    list.add(param);
+                }
+                uriBuilder.addParameters(list);
+            }
             httpGet = new HttpGet(uriBuilder.build());
         } catch (URISyntaxException e) {
             e.printStackTrace();
