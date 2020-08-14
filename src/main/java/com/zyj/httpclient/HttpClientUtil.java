@@ -171,6 +171,56 @@ public class HttpClientUtil {
         return result;
     }
 
+    /**
+     * 对象形式的参数
+     * @param url
+     * @param t
+     * @param reSend
+     * @param <T>
+     * @return
+     */
+    public  static <T>String sendHttpGet(String url, T t, int reSend)  {
+        //声明返回结果
+        String result = "";
+        //开始请求API接口时间
+        long startTime=System.currentTimeMillis();
+        //请求API接口的响应时间
+        long endTime= 0L;
+        HttpEntity httpEntity = null;
+        HttpResponse httpResponse = null;
+        HttpClient httpClient = null;
+        try {
+            httpClient = HttpClientFactory.getInstance().getHttpClient();
+            HttpGet httpGet = HttpClientFactory.getInstance().httpGet(url,t);
+//            logger.info("请求{}接口的参数为{}",url);
+
+            // 通过client调用execute方法，得到我们的执行结果就是一个response，所有的数据都封装在response里面了
+
+            httpResponse = httpClient.execute(httpGet);
+            httpEntity = httpResponse.getEntity();
+            // 通过EntityUtils 来将我们的数据转换成字符串
+            result = EntityUtils.toString(httpEntity,"UTF-8");
+        } catch (Exception e) {
+            logger.error("请求{}接口出现异常",url,e);
+            if (reSend > 0) {
+                logger.info("请求{}出现异常:{}，进行重发。进行第{}次重发",url,e.getMessage(),(HttpConstant.REQ_TIMES-reSend +1));
+                result = sendHttpGet(url, t, reSend - 1);
+                if (result != null && !"".equals(result)) {
+                    return result;
+                }
+            }
+        }finally {
+            try {
+                EntityUtils.consume(httpEntity);
+            } catch (IOException e) {
+                logger.error("http请求释放资源异常",e);
+            }
+        }
+        endTime=System.currentTimeMillis();
+        logger.info("请求{}接口的响应报文内容为{},本次请求API接口的响应时间为:{}毫秒",url,result,(endTime-startTime));
+        return result;
+    }
+
 
     /**
      * 通过post方式调用http接口
